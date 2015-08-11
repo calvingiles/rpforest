@@ -325,6 +325,7 @@ cdef void make_tree(Node *node, double[:, ::1] X, unsigned int max_size, unsigne
     cdef double dst
     cdef double[::1] hyperplane
     cdef vector[double] dist
+    dist.reserve(dim)
 
     cdef Node *left
     cdef Node *right
@@ -359,10 +360,10 @@ cdef void make_tree(Node *node, double[:, ::1] X, unsigned int max_size, unsigne
     # Split points at median similarity.
     for i in range(node.indices.size()):
         idx = deref(node.indices)[i]
-        dst = dot(node.hyperplane,
-                  X[idx, :],
-                  dim)
-        if dst <= node.median:
+        # dst = dot(node.hyperplane,
+        #           X[idx, :],
+        #           dim)
+        if dist[i] <= node.median:
             left.indices.push_back(idx)
         else:
             right.indices.push_back(idx)
@@ -432,6 +433,7 @@ cdef inline Node* new_node(unsigned int dim):
 
     node.n_descendants = 0
     node.indices = new vector[int]()
+    node.indices.reserve(dim)
     node.hyperplane = <hyp *>malloc(dim * sizeof(hyp))
 
     if node.hyperplane == NULL:
